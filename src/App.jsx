@@ -4,10 +4,39 @@ import ScreenShot from 'html2canvas'
 
 export default function App() {
 
-const[tcolor, setTColor] = useState('000')
-const[bgCol, setBgCol] = useState('000')
+const[tcolor, setTColor] = useState('#000')
+const[bgCol, setBgCol] = useState('#000')
 const image = useRef(null)
 const [fontSize, setFontSize]=useState(16);//comp
+
+const sizePresets = [
+  { name: "Instagram Story (9:16)", width: 270, height: 480 },
+  { name: "Instagram Post (1:1)", width: 300, height: 300 },
+  { name: "YouTube Thumbnail (16:9)", width: 320, height: 180 },
+  { name: "Facebook Post (1.91:1)", width: 360, height: 188 },
+  { name: "Landscape (16:9)", width: 400, height: 225 },
+  { name: "Portrait (4:5)", width: 300, height: 375 },
+  { name: "Custom", width: '', height: '' }
+];
+
+
+const [selectedPresetIndex, setSelectedPresetIndex] = useState(5);
+const [canvasSize, setCanvasSize] = useState({
+  width: sizePresets[5].width,
+  height: sizePresets[5].height
+});
+
+const handlePresetChange = (index) => {
+  setSelectedPresetIndex(index);
+  const preset = sizePresets[index];
+  if (preset.name === "Custom") {
+    setCanvasSize({ width: '', height: '' });
+  } else {
+    setCanvasSize({ width: preset.width, height: preset.height });
+  }
+};
+
+
 
 
 
@@ -73,11 +102,53 @@ const fontSizeChange=(e)=>{
       <h1>Color And Picker</h1>
       <div className="main">
         <div id='text-button'>
-        <h2 id="head" ref={image} 
-        contentEditable="true"
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        >Type here...</h2>
+        <h2
+  id="head"
+  ref={image}
+  contentEditable="true"
+  onFocus={handleFocus}
+  onBlur={handleBlur}
+  style={{
+    width: `${canvasSize.width}px`,
+    height: `${canvasSize.height}px`,
+    overflow: 'auto',
+    padding: '10px',
+    border: '2px dashed #ccc'
+  }}
+>
+  Type here...
+</h2>
+<div className='warn'>
+<span>! Make sure your text must not be overflow</span>
+</div>
+<div className='resize-pic' style={{ marginBottom: "20px" }}>
+  <h3>Resize the picture</h3>
+  <select className='select-size' value={selectedPresetIndex} onChange={(e) => handlePresetChange(Number(e.target.value))}>
+    {sizePresets.map((preset, index) => (
+      <option key={index} value={index}>
+        {preset.name}
+      </option>
+    ))}
+  </select>
+
+  {sizePresets[selectedPresetIndex].name === "Custom" && (
+    <div className='options' style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+      <input
+        type="number"
+        placeholder="Width"
+        value={canvasSize.width}
+        onChange={(e) => setCanvasSize(prev => ({ ...prev, width: +e.target.value }))}
+      />
+      <input
+        type="number"
+        placeholder="Height"
+        value={canvasSize.height}
+        onChange={(e) => setCanvasSize(prev => ({ ...prev, height: +e.target.value }))}
+      />
+    </div>
+  )}
+</div>
+
                
                 <div className='downloadbtn'>
                     <button className="download-btn" id="downloadBtn" onClick={downloadImage} >download
